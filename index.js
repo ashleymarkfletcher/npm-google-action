@@ -1,8 +1,9 @@
 'use strict';
 
-const fetch = require('node-fetch'); 
+const fetch = require('node-fetch');
 const functions = require('firebase-functions'); // Cloud Functions for Firebase library
 const DialogflowApp = require('actions-on-google').DialogflowApp; // Google Assistant helper library
+
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
   console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
   console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
@@ -12,11 +13,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     console.log('Invalid Request');
     return response.status(400).end('Invalid Webhook Request (expecting v2 webhook request)');
   }
-});
-
-// Construct rich response for Google Assistant (v1 requests only)
-// const app = new DialogflowApp();
-
+})
 /*
 * Function to handle v2 webhook requests from Dialogflow
 */
@@ -44,13 +41,15 @@ function processV2Request (request, response) {
     },
     'input.package': () => {
       // Use the Actions on Google lib to respond to Google requests; for other requests use JSON
-         
+
         fetch('https://registry.npmjs.org/' + parameters.package)
         .then(function(res) {
             return res.json();
         }).then(function(json) {
             console.log(json);
-            sendResponse(json.description); // Send simple response to user
+            sendResponse(
+              'the description is ' + json.description + '. The latest version of ' + parameters.package + ' is ' + json['dist-tags'].latest
+            ); // Send simple response to user
         }).catch((err)=>{ throw new Error(err)})
     },
     // Default handler for unknown or undefined actions
