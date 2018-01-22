@@ -47,9 +47,15 @@ function processV2Request (request, response) {
             return res.json();
         }).then(function(json) {
             console.log(json);
-            sendResponse(
-              'the description is ' + json.description + '. The latest version of ' + parameters.package + ' is ' + json['dist-tags'].latest
-            ); // Send simple response to user
+
+            // if package doesn't exist, an empty object is returned
+            if ( Object.keys(json).length ) {
+              sendResponse(
+                'the description is ' + json.description + '. The latest version of ' + parameters.package + ' is ' + json['dist-tags'].latest
+              )
+            } else {
+              sendResponse( 'Sorry, ' + parameters.package + ' could not be found in the NPM registry ' )
+            }
         }).catch((err)=>{ throw new Error(err)})
     },
     // Default handler for unknown or undefined actions
